@@ -14,8 +14,15 @@ import "./util/EnumerableSet.sol";
 import "./util/IERC2981.sol";
 import "./IMarket.sol";
 import "./util/OwnableUpgradeable.sol";
+import "./util/ReentrancyGuardUpgradeable.sol";
 
-contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
+contract MyMarket is
+    IMarket,
+    OwnableUpgradeable,
+    ERC1155Holder,
+    ERC721Holder,
+    ReentrancyGuardUpgradeable
+{
     using SafeMath for uint256;
     using SafeERC20 for IERC20;
     using EnumerableSet for EnumerableSet.UintSet;
@@ -225,6 +232,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
 
     function initialize() external initializer {
         __Ownable_init();
+        __ReentrancyGuard_init();
         tradeFeeRate = 500;
     }
 
@@ -248,7 +256,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
         uint256 timeLimit,
         uint256 changeRate,
         uint256 minPrice
-    ) external payable override returns (uint256) {
+    ) external payable override nonReentrant returns (uint256) {
         require(price > 0, "Price invalid");
         require(timeLimit > 0, "TimeLimit invalid");
         // verify changeRate and minPrice
@@ -328,7 +336,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
         uint256 orderId,
         uint256 price,
         uint256 timeLimit
-    ) external payable override {
+    ) external payable override nonReentrant {
         Order memory order = orderStorage[orderId];
         require(order.id > 0, "Order not exist");
         require(order.orderOwner == msg.sender, "Order owner mismatch");
@@ -367,7 +375,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
         orderStorage[order.id] = order;
     }
 
-    function cancelOrder(uint256 orderId) external override {
+    function cancelOrder(uint256 orderId) external override nonReentrant {
         Order memory order = orderStorage[orderId];
         require(order.id > 0, "Order not exist");
         require(order.orderOwner == msg.sender, "Order owner not match");
@@ -383,7 +391,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
         uint256 orderId,
         uint256 price,
         uint256 tokenId
-    ) external payable override {
+    ) external payable override nonReentrant {
         Order memory order = orderStorage[orderId];
         require(order.id > 0, "Order not exist");
         require(order.orderType != OrderType.Auction, "OrderType invalid");
@@ -472,7 +480,10 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
         _unlockToken(order.token, msg.sender, price - totalFee);
     }
 
-    function bid(uint256 orderId, uint256 price) external payable override {
+    function bid(
+        uint256 orderId,
+        uint256 price
+    ) external payable override nonReentrant {
         Order memory order = orderStorage[orderId];
         require(order.id > 0, "Order not exist");
         require(price >= order.price, "Price needs to exceed reserve price");
@@ -503,7 +514,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
     }
 
     // cancelAll will cancel all the orders, only owner
-    function cancelAll() external override onlyOwner {
+    function cancelAll() external override onlyOwner nonReentrant {
         uint256 length = _orderCounter.current();
         for (uint256 i = 0; i < length; i++) {
             Order memory order = orderStorage[i + 1];
@@ -531,7 +542,7 @@ contract MyMarket is IMarket, OwnableUpgradeable, ERC1155Holder, ERC721Holder {
 
     // deal with the expired order
     // aution with bidder will claim, without bidder will refund
-    function endOrder(uint256 orderId) external override {
+    function endOrder(uint256 orderId) external override nonReentrant {
         Order memory order = orderStorage[orderId];
         require(order.id > 0, "Order not exist");
         require(block.timestamp > order.endTime, "Order is not expired");
