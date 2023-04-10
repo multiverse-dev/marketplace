@@ -232,19 +232,14 @@ Returns
 # 合约升级
 
 ## 首次部署
-调用 `.\scripts\deploy.js` 中的 `proxyDeploy` 方法，返回的即为代理合约地址，今后要对MyMarket合约中方法进行调用时，直接调用该地址。
+首先要在`hardhat.config.ts`中配置对应的网络，默认networks中有zksync测试网`zkSyncTestnet`和zksync的本地测试环境，配置到对应的网络的RPC参数和`accounts`里添加私钥后(使用第一个私钥)，`defaultNetwork`改为对应的网络名称。
 ```
-async function main() {
-    await proxyDeploy("MyMarket", []);
-}
+yarn install # 安装依赖
+yarn hardhat deploy-zksync # 部署到指定网络
 ```
-
-注：只有通过这种方式部署的合约，才可通过下面的方法升级。
 
 ## 合约升级
-调用 `.\scripts\deploy.js` 中的 `proxyUpgrade` 方法，可以看到升级后的代理合约地址不变。
+运行 `.\scripts\upgrade.ts` 首先修改里面的`Proxy`地址，运行后，脚本会自动重新部署Market合约并调用`Proxy`的`Upgrade`方法将实现合约更新为刚部署的Market合约地址。
 ```
-async function main() {
-    await proxyUpgrade("MyMarket", "/*代理合约地址*/");
-}
+yarn hardhat run scripts/upgrade.ts
 ```
