@@ -235,6 +235,7 @@ Returns
 首先要在`hardhat.config.ts`中配置对应的网络，默认networks中有zksync测试网`zkSyncTestnet`和zksync的本地测试环境，配置到对应的网络的RPC参数和`accounts`里添加私钥后(使用第一个私钥)，`defaultNetwork`改为对应的网络名称。
 ```
 yarn install # 安装依赖
+yarn hardhat compile # 编译合约
 yarn hardhat deploy-zksync # 部署到指定网络
 ```
 
