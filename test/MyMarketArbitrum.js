@@ -1,12 +1,14 @@
 const { expect } = require("chai");
+const { BigNumber } = require("ethers");
 const { ethers } = require("hardhat");
+require("@nomicfoundation/hardhat-chai-matchers");
 const SaiyaNFTAbi = require("./SaiyaNFT.json").abi;
 
 const SUCCESS = 1;
 
-const SaiyaToken = "0x52ef56ff33F2CCBa571243C67df534d5F94e5e3C";
-const SaiyaNFT = "0xe240caaE765E48804cbf8a16de61b02fBBfCb4Fc";
-const Market = "0x0C0C35F5AAbb453901441702fc051dc500D29B52";
+const SaiyaToken = "0xF7818cd5f5Dc379965fD1C66b36C0C4D788E7cDB";
+const SaiyaNFT = "0x78a6dC8D17027992230c112432E42EC3d6838d74";
+const Market = "0x7b650845242a96595f3a9766D4e8e5ab0887936A";
 
 describe("test arbitrum", function () {
 
@@ -54,13 +56,13 @@ describe("test arbitrum", function () {
 
     it("setTradeFeeRate", async function () {
         const defaultTradeFeeRate = 500;
-        expect(await market.getTradeFeeRate()).to.equal(defaultTradeFeeRate);
+        expect((await market.getTradeFeeRate()).eq(BigNumber.from(defaultTradeFeeRate))).be.true;
         const rate1 = 1000;
         await expectTxSuccess(await market.setTradeFeeRate(rate1));
-        expect(await market.getTradeFeeRate()).to.equal(rate1);
+        expect((await market.getTradeFeeRate()).eq(rate1)).be.true;
         const [_, other] = await ethers.getSigners();
         const rate2 = 1500;
-        await expect(market.connect(other).setTradeFeeRate(rate2)).to.be.revertedWith("caller is not the owner");
+        await expect(market.connect(other).setTradeFeeRate(rate2)).to.be.revertedWith("Ownable: caller is not the owner");
         await market.setTradeFeeRate(defaultTradeFeeRate);// recover
     });
 
@@ -73,7 +75,7 @@ describe("test arbitrum", function () {
             market = market.connect(other);
             let orderId = await createOrder(other, 0, 0, nft.address, tokenId, 1, ft.address, 1, 3600, 0, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
         });
 
         it("CreateBuyOrder", async function () {
@@ -83,7 +85,7 @@ describe("test arbitrum", function () {
             await ft.connect(other).approve(market.address, amount);
             let orderId = await createOrder(other, 1, 0, nft.address, tokenId, 1, ft.address, amount, 3600, 0, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
         });
 
         it("CreateAutionOrder", async function () {
@@ -93,7 +95,7 @@ describe("test arbitrum", function () {
             await nft.connect(other).approve(market.address, tokenId);
             let orderId = await createOrder(other, 2, 0, nft.address, tokenId, 1, ft.address, amount, 3600, 5, amount);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
         });
 
         it("CreateDutchAutionOrder", async function () {
@@ -103,7 +105,7 @@ describe("test arbitrum", function () {
             await nft.connect(other).approve(market.address, tokenId);
             let orderId = await createOrder(other, 3, 0, nft.address, tokenId, 1, ft.address, amount, 3600, 5, amount - 10);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
         });
 
         it("CreateBuyCollectionOrder", async function () {
@@ -113,7 +115,7 @@ describe("test arbitrum", function () {
             await expectTxSuccess(await ft.connect(other).approve(market.address, amount));
             let orderId = await createOrder(other, 4, 0, nft.address, tokenId, 1, ft.address, amount, 3600, 5, amount);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
         });
 
         it("ChangeOrder", async function () {
@@ -124,13 +126,13 @@ describe("test arbitrum", function () {
             market = market.connect(other);
             let orderId = await createOrder(other, 0, 0, nft.address, tokenId, 1, ft.address, price1, 3600, 0, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
-            expect(order.price).to.equal(price1);
+            expect(order.id.eq(orderId)).be.true;
+            expect(order.price.eq(price1)).be.true;
             const price2 = 150;
             await expectTxSuccess(await market.changeOrder(orderId, price2, 7200));
             order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
-            expect(order.price).to.equal(price2);
+            expect(order.id.eq(orderId)).be.true;
+            expect(order.price.eq(price2)).be.true;
         });
 
         it("CancelOrder", async function () {
@@ -139,7 +141,7 @@ describe("test arbitrum", function () {
             await expectTxSuccess(await nft.connect(other).approve(market.address, tokenId));
             let orderId = await createOrder(other, 0, 0, nft.address, tokenId, 1, ft.address, 1, 3600, 0, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
             expect(await nft.ownerOf(tokenId)).to.equal(market.address);
             await expectTxSuccess(await market.connect(other).cancelOrder(orderId));
             expect(await nft.ownerOf(tokenId)).to.equal(other.address);
@@ -152,8 +154,8 @@ describe("test arbitrum", function () {
             await expectTxSuccess(await nft.connect(other).approve(market.address, tokenId));
             let orderId = await createOrder(other, 0, 0, nft.address, tokenId, 1, ft.address, price, 3600, 0, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
-            expect(order.price).to.equal(price);
+            expect(order.id.eq(orderId)).be.true;
+            expect(order.price.eq(price)).be.true;
             await expectTxSuccess(await ft.approve(market.address, price));
             await expectTxSuccess(await market.connect(owner).fulfillOrder(orderId, price, tokenId));
             expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
@@ -167,13 +169,13 @@ describe("test arbitrum", function () {
             await expectTxSuccess(await nft.connect(other).approve(market.address, tokenId));
             let orderId = await createOrder(other, 2, 0, nft.address, tokenId, 1, ft.address, Price, 3600, changeRate, 0);
             let order = await market.getOrder(orderId);
-            expect(order.id).to.equal(orderId);
+            expect(order.id.eq(orderId)).be.true;
             const NewPrice = Price * (50 + 1000) / 1000;
             await expectTxSuccess(await ft.approve(market.address, NewPrice));
             await expectTxSuccess(await market.connect(owner).bid(orderId, NewPrice));
             let { bidder, price } = await market.getBidInfo(orderId);
             expect(bidder).to.equal(owner.address);
-            expect(price).to.equal(NewPrice);
+            expect(price.eq(NewPrice)).be.true;
         });
     });
 });

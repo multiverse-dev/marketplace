@@ -33,7 +33,13 @@ async function main() {
     console.log("Token name:", await token.name());
 }
 
-main()
+// main()
+//     .then(() => process.exit(0))
+//     .catch((error) => {
+//         console.error(error);
+//         process.exit(1);
+//     });
+proxyDeploy("MyMarket")
     .then(() => process.exit(0))
     .catch((error) => {
         console.error(error);

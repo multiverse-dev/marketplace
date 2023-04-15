@@ -10,7 +10,7 @@ module.exports = {
     compilerSource: "binary",
     settings: {},
   },
-  defaultNetwork: "arbitrum",
+  defaultNetwork: "arbitrumLocal",
 
   networks: {
     zkSyncTestnet: {
@@ -25,13 +25,27 @@ module.exports = {
       zksync: true,
       accounts: ["7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"],
     },
-    arbitrum: {
+    arbitrumTestnet: {
       chainId: 421613,
       url: "https://goerli-rollup.arbitrum.io/rpc",
-      accounts: ["0ad222633c62106143aab084654c94f78913e764f302fa75a4d7d440f8f2dba3", "d4c3fcdcdf3652b275e269419fde173d0d8d3633aaa927671583c4aa3404d336"],
+      accounts: [],
+    },
+    arbitrumLocal: {
+      url: "http://localhost:8547",
+      accounts: ["0xe887f7d17d07cc7b8004053fb8826f6657084e88904bb61590e498ca04704cf2", "0xb6b15c8cb491557369f3c7d2c287b053eb229daa9c22138887752191c9520659"],
     }
   },
   solidity: {
-    version: "0.8.17",
+    compilers: [
+      {
+        version: "0.8.17",
+        settings: {
+          optimizer: {
+            enabled: true,
+            runs: 200,
+          },
+        },
+      },
+    ],
   },
 };
