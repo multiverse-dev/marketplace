@@ -231,6 +231,8 @@ Returns
 
 # arbitrum可升级部署
 
+先将`hardhat.config.ts`中`defaultNetwork`改为arbitrum网络，然后再`yarn install` 或者 `npm install`. 再编译`npx hardhat compile`或`yarn hardhat compile`
+
 ## 首次部署
 调用 `.\scripts\deploy.js` 中的 `proxyDeploy` 方法，返回的即为代理合约地址，今后要对MyMarket合约中方法进行调用时，直接调用该地址。
 ```
@@ -251,8 +253,9 @@ async function main() {
 
 # zksync可升级部署
 
+首先要在`hardhat.config.ts`中配置对应的zksync网络，默认networks中有zksync测试网`zkSyncTestnet`和zksync的本地测试环境，配置到对应的网络的RPC参数和`accounts`里添加私钥后(使用第一个私钥)，`defaultNetwork`改为对应的网络名称。
+
 ## 首次部署
-首先要在`hardhat.config.ts`中配置对应的网络，默认networks中有zksync测试网`zkSyncTestnet`和zksync的本地测试环境，配置到对应的网络的RPC参数和`accounts`里添加私钥后(使用第一个私钥)，`defaultNetwork`改为对应的网络名称。
 ```
 yarn install # 安装依赖
 yarn hardhat compile # 编译合约
