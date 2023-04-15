@@ -29,7 +29,7 @@ describe("test proxy", async function () {
 
 });
 
-describe("test suite", function () {
+describe("test zksync", function () {
 
     var market: MyMarket;
     var owner: zk.Wallet, other: zk.Wallet;

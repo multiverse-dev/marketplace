@@ -10,7 +10,7 @@ module.exports = {
     compilerSource: "binary",
     settings: {},
   },
-  defaultNetwork: "zkSyncLocal",
+  defaultNetwork: "arbitrum",
 
   networks: {
     zkSyncTestnet: {
@@ -25,6 +25,11 @@ module.exports = {
       zksync: true,
       accounts: ["7726827caac94a7f9e1b160f7ea819f172f7b6f9d2a97f992c38edeab82d4110"],
     },
+    arbitrum: {
+      chainId: 421613,
+      url: "https://goerli-rollup.arbitrum.io/rpc",
+      accounts: ["0ad222633c62106143aab084654c94f78913e764f302fa75a4d7d440f8f2dba3", "d4c3fcdcdf3652b275e269419fde173d0d8d3633aaa927671583c4aa3404d336"],
+    }
   },
   solidity: {
     version: "0.8.17",
