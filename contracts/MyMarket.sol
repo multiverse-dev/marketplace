@@ -415,6 +415,9 @@ contract MyMarket is
             order.orderType == OrderType.BuyCollection
         ) {
             _payNft(order, price, tokenId);
+            if (order.orderType == OrderType.BuyCollection) {
+                order.nftInfo.tokenId = tokenId;
+            }
         }
 
         emit CompleteOrder(

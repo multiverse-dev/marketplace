@@ -6,9 +6,9 @@ const SaiyaNFTAbi = require("./SaiyaNFT.json").abi;
 
 const SUCCESS = 1;
 
-const SaiyaToken = "0xF7818cd5f5Dc379965fD1C66b36C0C4D788E7cDB";
-const SaiyaNFT = "0x78a6dC8D17027992230c112432E42EC3d6838d74";
-const Market = "0x7b650845242a96595f3a9766D4e8e5ab0887936A";
+const SaiyaToken = "0x7F85fB7f42A0c0D40431cc0f7DFDf88be6495e67";
+const SaiyaNFT = "0x8c366Cfd28bC93729e14Da4fcf94d20862A7f266";
+const Market = "0x78a6dC8D17027992230c112432E42EC3d6838d74";
 
 describe("test arbitrum", function () {
 
@@ -176,6 +176,26 @@ describe("test arbitrum", function () {
             let { bidder, price } = await market.getBidInfo(orderId);
             expect(bidder).to.equal(owner.address);
             expect(price.eq(NewPrice)).be.true;
+        });
+
+        it("fix fullfill collection tokenId", async function () {
+            const amount = 100
+            let tokenId = "0";
+            await expectTxSuccess(await ft.transfer(other.address, amount));
+            await expectTxSuccess(await ft.connect(other).approve(market.address, amount));
+            let orderId = await createOrder(other, 4, 0, nft.address, tokenId, 1, ft.address, amount, 3600, 5, amount);
+            let order = await market.getOrder(orderId);
+            expect(order.id.eq(orderId)).be.true;
+            tokenId = await mintNFT();
+            console.log("tokenId: " + BigNumber.from(tokenId)._hex);
+            expect(await nft.ownerOf(tokenId)).to.equal(other.address);
+            await expectTxSuccess(await nft.connect(other).transferFrom(other.address, owner.address, tokenId))
+            expect(await nft.ownerOf(tokenId)).to.equal(owner.address);
+            await expectTxSuccess(await nft.connect(owner).approve(market.address, tokenId));
+            let tx = await market.connect(owner).fulfillOrder(orderId, amount, tokenId);
+            let r = await tx.wait();
+            console.log("tokenId in event: " + r.events[3].args.order.nftInfo.tokenId._hex);
+            expect(r.events[3].args.order.nftInfo.tokenId).eq(BigNumber.from(tokenId));
         });
     });
 });
